@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Task Dashboard</title>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a202c;
+    --text-muted: #718096;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --high: #ef4444;
+    --high-light: #fef2f2;
+    --med: #f59e0b;
+    --med-light: #fffbeb;
+    --low: #10b981;
+    --low-light: #ecfdf5;
+    --done: #94a3b8;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  header h1 { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .date { color: var(--text-muted); font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .stat-card { background: var(--surface); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .stat-card .label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: 6px; }
+  .stat-card .value { font-size: 2rem; font-weight: 700; }
+  .stat-card.total .value { color: var(--accent); }
+  .stat-card.done-card .value { color: var(--low); }
+  .stat-card.pending-card .value { color: var(--med); }
+
+  .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 700px) { .dashboard-row { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+  .progress-row { margin-bottom: 12px; }
+  .progress-row .cat-header { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 4px; }
+  .progress-bar { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width .4s; }
+
+  .priority-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .prio-box { border-radius: 8px; padding: 12px; text-align: center; }
+  .prio-box .pnum { font-size: 1.5rem; font-weight: 700; }
+  .prio-box .plabel { font-size: .75rem; font-weight: 600; text-transform: uppercase; }
+  .prio-box.high { background: var(--high-light); color: var(--high); }
+  .prio-box.med { background: var(--med-light); color: var(--med); }
+  .prio-box.low { background: var(--low-light); color: var(--low); }
+
+  .add-form { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px; }
+  .add-form h2 { font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 160px 140px 130px auto; gap: 10px; align-items: end; }
+  @media (max-width: 800px) { .form-row { grid-template-columns: 1fr 1fr; } }
+  .form-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+  .form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: .9rem; background: var(--bg); color: var(--text); outline: none; transition: border-color .2s; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .btn { padding: 9px 18px; border-radius: 7px; border: none; cursor: pointer; font-size: .9rem; font-weight: 600; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-sm { padding: 5px 12px; font-size: .8rem; }
+  .btn-danger { background: #fee2e2; color: var(--high); }
+  .btn-edit { background: var(--accent-light); color: var(--accent); }
+  .btn-export { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
+  .btn-import { background: #eff6ff; color: #2563eb; border: 1.5px solid #bfdbfe; }
+  .btn-cal { background: #fff7ed; color: #ea580c; border: 1.5px solid #fed7aa; }
+  .btn-save { background: #f5f3ff; color: #7c3aed; border: 1.5px solid #ddd6fe; }
+
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .filter-chip { padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); font-size: .82rem; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all .15s; }
+  .filter-chip.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .search-input { padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 99px; font-size: .85rem; outline: none; min-width: 180px; }
+  .search-input:focus { border-color: var(--accent); }
+
+  .task-list { display: flex; flex-direction: column; gap: 10px; }
+  .task-card { background: var(--surface); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; transition: opacity .2s; }
+  .task-card.completed { opacity: .55; }
+  .task-card .check { margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all .15s; }
+  .task-card .check:hover { border-color: var(--low); background: var(--low-light); }
+  .task-card.completed .check { background: var(--low); border-color: var(--low); color: #fff; }
+  .task-card .check svg { width: 11px; height: 11px; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: .95rem; font-weight: 600; margin-bottom: 4px; }
+  .task-card.completed .task-title { text-decoration: line-through; color: var(--done); }
+  .task-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; font-size: .75rem; font-weight: 600; }
+  .badge.high { background: var(--high-light); color: var(--high); }
+  .badge.medium { background: var(--med-light); color: var(--med); }
+  .badge.low { background: var(--low-light); color: var(--low); }
+  .badge.cat { background: var(--accent-light); color: var(--accent); }
+  .badge.due { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border); }
+  .badge.overdue { background: #fee2e2; color: var(--high); }
+  .task-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .empty { text-align: center; padding: 48px; color: var(--text-muted); }
+
+  /* Briefing */
+  .briefing-card { background: var(--surface); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px; }
+  .briefing-card .briefing-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .briefing-card .briefing-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .briefing-card .briefing-date { font-size: .8rem; color: var(--text-muted); }
+  .briefing-body { font-size: .88rem; line-height: 1.65; color: var(--text); }
+  .briefing-body strong { color: var(--text); font-weight: 700; }
+  .briefing-body ul { padding-left: 18px; margin: 4px 0 10px; }
+  .briefing-body li { margin-bottom: 3px; }
+  .briefing-body p { margin-bottom: 8px; }
+  .briefing-body .section { margin-bottom: 12px; }
+  .briefing-body .section-title { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--accent); margin-bottom: 5px; }
+  .briefing-collapsed .briefing-body { display: none; }
+  .toggle-btn { background: none; border: none; cursor: pointer; font-size: .82rem; color: var(--accent); font-weight: 600; padding: 2px 8px; border-radius: 5px; }
+  .toggle-btn:hover { background: var(--accent-light); }
+  .briefing-placeholder { color: var(--text-muted); font-size: .88rem; font-style: italic; padding: 12px 0; }
+  .sources { font-size: .75rem; color: var(--text-muted); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+  /* Sync banner */
+  .sync-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: var(--shadow); }
+  .sync-bar .sync-info { font-size: .85rem; color: var(--text-muted); }
+  .sync-bar .sync-info strong { color: var(--text); }
+  .sync-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1a202c; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: .88rem; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; z-index: 200; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.2); margin: 16px; }
+  .modal h2 { margin-bottom: 18px; font-size: 1.1rem; }
+  .modal .form-group { margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>📋 My Task Dashboard</h1>
+    <div class="header-right">
+      <span class="date" id="dateDisplay">Saturday, June 20 2026</span>
+    </div>
+  </header>
+
+  <!-- Morning Briefing -->
+  <div class="briefing-card briefing-collapsed" id="briefingCard">
+    <div class="briefing-header">
+      <span class="briefing-title">🌍 Morning Markets Briefing</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="briefing-date" id="briefingDate">Saturday, 20 June 2026</span>
+        <button class="toggle-btn" onclick="toggleBriefing()">▼ Expand</button>
+      </div>
+    </div>
+    <div class="briefing-body" id="briefingBody">
+<!-- BRIEFING_START -->
+<div class="section"><div class="section-title">🌍 Morning Markets Briefing — Sunday, 21 June 2026</div></div>
+<div class="section"><div class="section-title">Top Story</div><p>A synchronized global tightening wave defined the week: the Fed held at 3.50–3.75% but issued a hawkish pivot under new Chair Kevin Warsh (9 of 18 officials pencilling in a hike, median FFR raised to 3.8%), the ECB hiked +25bp on June 11 (first since 2023), and the BoJ raised to 1.00% on June 16 — its highest rate since 1995. Simultaneously, US-Iran peace talks collapsed after follow-up negotiations in Switzerland were abruptly cancelled, leaving oil elevated above $92/bbl and risk assets on edge heading into the week of June 22.</p></div>
+<div class="section"><div class="section-title">Central Banks &amp; Rates</div><ul><li><strong>Fed (June 18):</strong> Held at 3.50–3.75% (unanimous). Removed forward guidance on cuts. Median 2026 dot raised to 3.80% from 3.40%; 9 of 18 officials see ≥1 hike. Warsh explicitly prioritised price stability over growth support.</li><li><strong>ECB (June 11):</strong> +25bp — deposit facility to 2.25%, MRO 2.40%. First hike since 2023. Inflation baseline: 3.0% in 2026. Driver: persistent energy shock from Middle East/Strait of Hormuz. Markets price ≥1 additional hike by year-end.</li><li><strong>BoJ (June 16):</strong> +25bp to 1.00%, highest since 1995 (7-1 vote). Japan wholesale CPI +6.3% in May. Yen weakened to 160.22 vs USD despite the hike — rate differentials with the US still overwhelmingly favour the dollar.</li><li><strong>Swiss National Bank:</strong> Held rates unchanged. Switzerland revised 2026 GDP growth forecast down to 0.9% (from 1.0%) citing energy headwinds.</li></ul></div>
+<div class="section"><div class="section-title">Equities</div><ul><li><strong>US (Fri June 20 close):</strong> S&amp;P 500 ~7,500 (+1.08% Thursday); Nasdaq 100 +2.5% Thursday on AI/chip momentum. Week was volatile — sharp selloff June 17 on FOMC hawkish dot-plot, partially recovered on chipmaker rebound.</li><li><strong>Asia:</strong> Nikkei 225 +0.8% at record high; South Korea Kospi +3.1%, supported by AI semiconductor optimism. China/HK closed mid-week.</li><li><strong>Europe:</strong> Mixed to negative Friday as Iran deal durability questioned. CAC 40 underperformed peers; ECB hike and French fiscal concerns weighed on sentiment.</li><li><strong>Tech leadership:</strong> Top S&amp;P 500 weights — Nvidia (7.9%), Apple (6.8%), Alphabet (6.0%), Microsoft (4.4%), Amazon (3.7%) — continue to anchor index performance.</li></ul></div>
+<div class="section"><div class="section-title">FX &amp; Commodities</div><ul><li><strong>USD:</strong> Broad strength post-FOMC. EUR/USD fell to ~$1.145, weakest since mid-March, on track for -1% weekly loss. USD/JPY at multi-year highs despite BoJ hike. AUD and NOK favoured by strategists as commodity-linked alternatives.</li><li><strong>Oil:</strong> Brent above $92/bbl, WTI near $90. Elevated on Middle East supply risk premium. Iran talk cancellation renewed fears over Strait of Hormuz. Lower oil briefly priced in on ceasefire hopes — that trade has unwound.</li><li><strong>Gold:</strong> Fell to ~$4,106/oz — third consecutive weekly decline. Hawkish central banks and USD strength reducing appeal of non-yielding metals. Structural CB demand provides a floor.</li><li><strong>JGBs:</strong> 10-year JGB yield climbed to 2.615% after BoJ hike. Spread dynamics between JGBs and USTs/Bunds remain a key driver of global duration positioning.</li></ul></div>
+<div class="section"><div class="section-title">Macro Data &amp; Politics</div><ul><li><strong>US-Iran talks collapsed:</strong> Follow-up negotiations in Switzerland abruptly cancelled, reversing tentative weekend ceasefire optimism. Strait of Hormuz risk premium not fully priced out; oil and European equities vulnerable to further deterioration.</li><li><strong>G7 in Evian-les-Bains (France):</strong> Ukraine war, US tariffs (10–12.5% threatened on EU and 60 trading partners), and Iran-US tensions on agenda. Trade friction between US and G7 partners remains a macro overhang.</li><li><strong>US inflation trajectory:</strong> Fed raised 2026 inflation forecasts. PCE data Thursday June 25 is the next key reading — Wells Fargo forecasts headline +4.1% YoY, core +3.4% YoY. A hot print could cement the hike path.</li><li><strong>Eurozone:</strong> ECB projects headline inflation averaging 3.0% in 2026. Energy cost pass-through to core still materialising. Money markets now price ≥1 more ECB hike this year.</li></ul></div>
+<div class="section"><div class="section-title">From Le Figaro</div><ul><li><strong>G7 summit hosted by France:</strong> Evian-les-Bains summit puts France at the centre of global macro diplomacy. Ukraine aid, US tariff threats on EU goods, and Iran all on the agenda — outcomes could move EUR and European equities early next week.</li><li><strong>Choose France momentum:</strong> The June 1 summit attracted €93bn of investment commitments and 15,600 jobs — seventh consecutive year France tops European FDI rankings. Supports the narrative of French competitiveness despite fiscal headwinds.</li><li><strong>Tech sovereignty push:</strong> European Commission launched a "Tech Sovereignty Package" (June 3), driven significantly by French pressure. Aimed at reducing reliance on US digital infrastructure — potential regulatory implications for US tech names with EU exposure.</li></ul></div>
+<div class="section"><div class="section-title">What to Watch Today</div><ul><li><strong>Monday June 22 — US market reopen:</strong> First session after the FOMC hawkish pivot and Iran talk collapse. Catch-up price action expected; watch for any weekend Iran/G7 headlines that shift the tone.</li><li><strong>Fed speakers (week of June 22):</strong> Multiple FOMC officials scheduled post-meeting. Chair Warsh's first post-hike-signal remarks will be closely watched for rate path calibration.</li><li><strong>Thursday June 25 — PCE inflation:</strong> May PCE and core PCE (Fed's preferred inflation gauge). Consensus: headline ~4.1% YoY, core ~3.4% YoY. A hot print hardens the case for a 2026 hike; a miss opens a small window for a hold. Also: Germany Ifo Business Survey and Canada CPI this week.</li></ul></div>
+<div class="sources">Sources: The Economist | Financial Times | Le Figaro | New York Times</div>
+<!-- BRIEFING_END -->
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid">
+    <div class="stat-card total"><div class="label">Total Tasks</div><div class="value" id="statTotal">16</div></div>
+    <div class="stat-card done-card"><div class="label">Completed</div><div class="value" id="statDone">0</div></div>
+    <div class="stat-card pending-card"><div class="label">Pending</div><div class="value" id="statPending">16</div></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard-row">
+    <div class="card">
+      <h2>Progress by Category</h2>
+      <div id="categoryProgress"><div class="progress-row"><div class="cat-header"><span>Personal</span><span style="color:var(--text-muted)">0/15</span></div><div class="progress-bar"><div class="progress-fill" style="width:0%;background:#8b5cf6"></div></div></div><div class="progress-row"><div class="cat-header"><span>Work</span><span style="color:var(--text-muted)">0/1</span></div><div class="progress-bar"><div class="progress-fill" style="width:0%;background:#4f46e5"></div></div></div></div>
+    </div>
+    <div class="card">
+      <h2>By Priority</h2>
+      <div class="priority-grid">
+        <div class="prio-box high"><div class="pnum" id="countHigh">2</div><div class="plabel">High</div></div>
+        <div class="prio-box med"><div class="pnum" id="countMed">14</div><div class="plabel">Medium</div></div>
+        <div class="prio-box low"><div class="pnum" id="countLow">0</div><div class="plabel">Low</div></div>
+      </div>
+      <div style="margin-top:18px;">
+        <h2>Overdue</h2>
+        <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:var(--high)" id="statOverdue">2</div>
+        <div style="font-size:.8rem;color:var(--text-muted)">tasks past due date</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync bar -->
+  <div class="sync-bar">
+    <div class="sync-info">
+      ✅ <strong>Sync automatique</strong> — Tes tâches se synchronisent automatiquement sur iPhone, iPad et Mac.
+      <span id="lastSaved" style="margin-left:8px;color:var(--accent)"></span>
+    </div>
+    <div class="sync-actions">
+      <button class="btn btn-export" onclick="exportTasks()">⬇ Export</button>
+      <button class="btn btn-import" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importTasks(event)">
+      <button class="btn btn-cal" onclick="exportCalendar()">📅 Export to Calendar</button>
+      <button class="btn btn-save" id="btnSave" onclick="saveFile()">💾 Save file</button>
+    </div>
+  </div>
+
+  <!-- Add Task -->
+  <div class="add-form">
+    <h2>➕ Add New Task</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Task</label>
+        <input type="text" id="newTitle" placeholder="What needs to be done?">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="newCat">
+          <option>Personal</option>
+          <option>Work</option>
+          <option>Health</option>
+          <option>Finance</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="newPrio">
+          <option value="high">🔴 High</option>
+          <option value="medium" selected="">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="newDue">
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="addTask()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input class="search-input" id="searchInput" placeholder="🔍 Search tasks…" oninput="render()">
+    <span style="font-size:.82rem;color:var(--text-muted);font-weight:600;">Status:</span>
+    <button class="filter-chip active" onclick="setFilter('status','all',this)" data-group="status">All</button>
+    <button class="filter-chip" onclick="setFilter('status','pending',this)" data-group="status">Pending</button>
+    <button class="filter-chip" onclick="setFilter('status','completed',this)" data-group="status">Completed</button>
+    <span style="font-size:.82rem;color:var(--text-muted);font-weight:600;margin-left:4px;">Priority:</span>
+    <button class="filter-chip active" onclick="setFilter('prio','all',this)" data-group="prio">All</button>
+    <button class="filter-chip" onclick="setFilter('prio','high',this)" data-group="prio">🔴 High</button>
+    <button class="filter-chip" onclick="setFilter('prio','medium',this)" data-group="prio">🟡 Medium</button>
+    <button class="filter-chip" onclick="setFilter('prio','low',this)" data-group="prio">🟢 Low</button>
+    <span style="font-size:.82rem;color:var(--text-muted);font-weight:600;margin-left:4px;">Category:</span>
+    <button class="filter-chip active" onclick="setFilter('cat','all',this)" data-group="cat">All</button>
+    <button class="filter-chip" onclick="setFilter('cat','Personal',this)" data-group="cat" style="--chip-color:#8b5cf6">Personal</button>
+    <button class="filter-chip" onclick="setFilter('cat','Work',this)" data-group="cat" style="--chip-color:#4f46e5">Work</button>
+    <button class="filter-chip" onclick="setFilter('cat','Health',this)" data-group="cat" style="--chip-color:#10b981">Health</button>
+    <button class="filter-chip" onclick="setFilter('cat','Finance',this)" data-group="cat" style="--chip-color:#f59e0b">Finance</button>
+    <button class="filter-chip" onclick="setFilter('cat','Other',this)" data-group="cat" style="--chip-color:#64748b">Other</button>
+  </div>
+
+  <div class="task-list" id="taskList"><div class="task-card "><div class="check" onclick="toggleDone(1781953255909)"></div><div class="task-body"><div class="task-title">Prendre billet Shuttle 3/7 et vacances</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge high">🔴 High</span><span class="badge due">📅 21/06/2026</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781953255909)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781953255909)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781955287890)"></div><div class="task-body"><div class="task-title">Responder a Hoops pour message sur efficient team</div><div class="task-meta"><span class="badge cat" style="background:#4f46e522;color:#4f46e5">Work</span><span class="badge high">🔴 High</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781955287890)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781955287890)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781952240165)"></div><div class="task-body"><div class="task-title">Reparer chemise</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span><span class="badge overdue">⚠️ Overdue</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781952240165)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781952240165)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781953275299)"></div><div class="task-body"><div class="task-title">Changer billet avion Lyon</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span><span class="badge overdue">⚠️ Overdue</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781953275299)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781953275299)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781952212828)"></div><div class="task-body"><div class="task-title">Take a dentist appointment</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span><span class="badge due">📅 21/06/2026</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781952212828)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781952212828)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781952258296)"></div><div class="task-body"><div class="task-title">Organiser augustin birthday</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781952258296)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781952258296)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781953139924)"></div><div class="task-body"><div class="task-title">Acheter calecons</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781953139924)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781953139924)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781953301835)"></div><div class="task-body"><div class="task-title">Prendre RDV Dermato</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781953301835)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781953301835)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781958185675)"></div><div class="task-body"><div class="task-title">Test</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781958185675)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781958185675)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781958400170)"></div><div class="task-body"><div class="task-title">hyhhy</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781958400170)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781958400170)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781958402392)"></div><div class="task-body"><div class="task-title">jyjyjy</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781958402392)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781958402392)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781958408879)"></div><div class="task-body"><div class="task-title">jyjyjyj</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781958408879)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781958408879)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781959001859)"></div><div class="task-body"><div class="task-title">new tenst</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781959001859)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781959001859)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781959064918)"></div><div class="task-body"><div class="task-title">thththththth</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781959064918)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781959064918)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781972075820)"></div><div class="task-body"><div class="task-title">ololololololo</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781972075820)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781972075820)">✕</button></div></div><div class="task-card "><div class="check" onclick="toggleDone(1781972452537)"></div><div class="task-body"><div class="task-title">ahurissant</div><div class="task-meta"><span class="badge cat" style="background:#8b5cf622;color:#8b5cf6">Personal</span><span class="badge medium">🟡 Medium</span></div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(1781972452537)">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(1781972452537)">✕</button></div></div></div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>✏️ Edit Task</h2>
+    <div class="form-group"><label>Task</label><input type="text" id="editTitle"></div>
+    <div class="form-group"><label>Category</label>
+      <select id="editCat">
+        <option>Personal</option><option>Work</option><option>Health</option><option>Finance</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Priority</label>
+      <select id="editPrio">
+        <option value="high">🔴 High</option>
+        <option value="medium">🟡 Medium</option>
+        <option value="low">🟢 Low</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Due Date</label><input type="date" id="editDue"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Embedded tasks data (syncs with iCloud) -->
+<script id="tasks-embedded" type="application/json"><!-- TASKS_DATA_START -->[{"id":1781952212828,"title":"Take a dentist appointment","cat":"Personal","prio":"medium","due":"2026-06-21","done":false,"created":"2026-06-20T10:43:32.828Z"},{"id":1781952240165,"title":"Reparer chemise","cat":"Personal","prio":"medium","due":"2026-06-10","done":false,"created":"2026-06-20T10:44:00.165Z"},{"id":1781952258296,"title":"Organiser augustin birthday","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T10:44:18.296Z"},{"id":1781953139924,"title":"Acheter calecons","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T10:58:59.924Z"},{"id":1781953255909,"title":"Prendre billet Shuttle 3/7 et vacances","cat":"Personal","prio":"high","due":"2026-06-21","done":false,"created":"2026-06-20T11:00:55.909Z"},{"id":1781953275299,"title":"Changer billet avion Lyon","cat":"Personal","prio":"medium","due":"2026-06-18","done":false,"created":"2026-06-20T11:01:15.299Z"},{"id":1781953301835,"title":"Prendre RDV Dermato","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T11:01:41.835Z"},{"id":1781955287890,"title":"Responder a Hoops pour message sur efficient team","cat":"Work","prio":"high","due":"","done":false,"created":"2026-06-20T11:34:47.890Z"},{"id":1781958185675,"title":"Test","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:23:05.675Z"},{"id":1781958400170,"title":"hyhhy","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:26:40.170Z"},{"id":1781958402392,"title":"jyjyjy","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:26:42.392Z"},{"id":1781958408879,"title":"jyjyjyj","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:26:48.879Z"},{"id":1781959001859,"title":"new tenst","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:36:41.859Z"},{"id":1781959064918,"title":"thththththth","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T12:37:44.918Z"},{"id":1781972075820,"title":"ololololololo","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T16:14:35.820Z"},{"id":1781972452537,"title":"ahurissant","cat":"Personal","prio":"medium","due":"","done":false,"created":"2026-06-20T16:20:52.538Z"}]<!-- TASKS_DATA_END --></script>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Saved — syncing to all devices…</div>
+
+<script>
+  // ── Load tasks: localStorage first, then embedded ──
+  const _embedded = document.getElementById('tasks-embedded');
+  const _embeddedRaw = _embedded ? _embedded.textContent.replace(/<!--.*?-->/g,'').trim() : '';
+  const _lsRaw = localStorage.getItem('tasks_v1');
+  let tasks = _lsRaw ? JSON.parse(_lsRaw) : (_embeddedRaw && _embeddedRaw !== '[]' ? JSON.parse(_embeddedRaw) : []);
+  // On iOS: relabel the Save button — it exports JSON (can't write files on iOS)
+  const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  if (_isIOS) { const b = document.getElementById('btnSave'); if(b) b.textContent = '📤 Export tasks'; }
+
+  let filters = { status: 'all', prio: 'all', cat: 'all' };
+  let editId = null;
+
+  let briefingOpen = true;
+  function toggleBriefing() {
+    briefingOpen = !briefingOpen;
+    document.getElementById('briefingCard').classList.toggle('briefing-collapsed', !briefingOpen);
+    document.querySelector('.toggle-btn').textContent = briefingOpen ? '▲ Collapse' : '▼ Expand';
+  }
+
+  (function() {
+    const body = document.getElementById('briefingBody').innerText;
+    const m = body.match(/Morning Markets Briefing\s*[—–-]\s*(.+)/);
+    if (m) document.getElementById('briefingDate').textContent = m[1].trim();
+  })();
+
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('dateDisplay').textContent =
+    days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  function save() {
+    localStorage.setItem('tasks_v1', JSON.stringify(tasks));
+    const t = new Date();
+    document.getElementById('lastSaved').textContent =
+      'Last saved: ' + t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+
+  }
+
+  // ── Save file — direct iCloud write via File System Access API ──
+  const _IDB = 'dashboard_db', _STORE = 'handles';
+
+  function _openDB() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(_IDB, 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore(_STORE);
+      r.onsuccess = e => res(e.target.result);
+      r.onerror = rej;
+    });
+  }
+  async function _getHandle() {
+    const db = await _openDB();
+    return new Promise((res, rej) => {
+      const r = db.transaction(_STORE,'readonly').objectStore(_STORE).get('fh');
+      r.onsuccess = () => res(r.result||null); r.onerror = rej;
+    });
+  }
+  async function _putHandle(h) {
+    const db = await _openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(_STORE,'readwrite');
+      tx.objectStore(_STORE).put(h,'fh');
+      tx.oncomplete = res; tx.onerror = rej;
+    });
+  }
+
+
+  async function saveFile() {
+    save(); // push to GitHub + localStorage
+    toast('💾 Sauvegardé — synchronisation iPhone en cours…');
+  }
+
+
+
+  function exportCalendar() {
+    const withDates = tasks.filter(t => t.due && !t.done);
+    if (!withDates.length) { toast('⚠️ No pending tasks with a due date to export.'); return; }
+    const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//My Task Dashboard//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+    withDates.forEach(t => {
+      const dateStr = t.due.replace(/-/g,'');
+      const d = new Date(t.due+'T00:00:00'); d.setDate(d.getDate()+1);
+      const endStr = d.toISOString().slice(0,10).replace(/-/g,'');
+      const prioMap = {high:'1',medium:'5',low:'9'};
+      lines.push('BEGIN:VEVENT',`UID:task-${t.id}@mytaskdashboard`,`DTSTART;VALUE=DATE:${dateStr}`,`DTEND;VALUE=DATE:${endStr}`,
+        `SUMMARY:${t.title.replace(/,/g,'\\,')}`,`DESCRIPTION:Category: ${t.cat} | Priority: ${t.prio.charAt(0).toUpperCase()+t.prio.slice(1)}`,
+        `PRIORITY:${prioMap[t.prio]||'5'}`,`STATUS:NEEDS-ACTION`,`CATEGORIES:${t.cat.toUpperCase()}`,'END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    const blob = new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url;
+    a.download='my-tasks-'+new Date().toISOString().slice(0,10)+'.ics';
+    a.click(); URL.revokeObjectURL(url);
+    toast(`✅ ${withDates.length} tasks exported! Double-click the .ics to open in Apple Calendar.`);
+  }
+
+  function exportTasks() {
+    const data = JSON.stringify({version:1,exported:new Date().toISOString(),tasks},null,2);
+    const blob = new Blob([data],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url;
+    a.download='my-tasks-'+new Date().toISOString().slice(0,10)+'.json';
+    a.click(); URL.revokeObjectURL(url);
+    toast('✅ Tasks exported! Transfer the file to your other device.');
+  }
+
+  function importTasks(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const imported = Array.isArray(data) ? data : (data.tasks||[]);
+        if (!Array.isArray(imported)) throw new Error();
+        const importedIds = new Set(imported.map(t=>t.id));
+        tasks = [...tasks.filter(t=>!importedIds.has(t.id)),...imported];
+        tasks.sort((a,b)=>new Date(a.created||0)-new Date(b.created||0));
+        save(); render();
+        toast('✅ '+imported.length+' tasks imported successfully!');
+      } catch(err) { toast('❌ Could not read file. Make sure it\'s a valid export.'); }
+      event.target.value='';
+    };
+    reader.readAsText(file);
+  }
+
+  function addTask() {
+    const title = document.getElementById('newTitle').value.trim();
+    if (!title) { document.getElementById('newTitle').focus(); return; }
+    tasks.push({id:Date.now(),title,cat:document.getElementById('newCat').value,
+      prio:document.getElementById('newPrio').value,due:document.getElementById('newDue').value,
+      done:false,created:new Date().toISOString()});
+    document.getElementById('newTitle').value='';
+    document.getElementById('newDue').value='';
+    save(); render();
+  }
+  document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+
+  function toggleDone(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;save();render();}}
+  function deleteTask(id){if(confirm('Delete this task?')){tasks=tasks.filter(t=>t.id!==id);save();render();}}
+
+  function openEdit(id){
+    const t=tasks.find(t=>t.id===id);editId=id;
+    document.getElementById('editTitle').value=t.title;
+    document.getElementById('editCat').value=t.cat;
+    document.getElementById('editPrio').value=t.prio;
+    document.getElementById('editDue').value=t.due||'';
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal(){document.getElementById('modalOverlay').classList.remove('open');editId=null;}
+  function saveEdit(){
+    const t=tasks.find(t=>t.id===editId);
+    if(t){t.title=document.getElementById('editTitle').value.trim()||t.title;
+      t.cat=document.getElementById('editCat').value;t.prio=document.getElementById('editPrio').value;
+      t.due=document.getElementById('editDue').value;save();}
+    closeModal();render();
+  }
+  document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+  function setFilter(type,val,el){
+    filters[type]=val;
+    document.querySelectorAll(`[data-group="${type}"]`).forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');render();
+  }
+
+  function isOverdue(due){return due?new Date(due)<new Date(new Date().toDateString()):false;}
+  function formatDate(due){if(!due)return'';const[y,m,d]=due.split('-');return d+'/'+m+'/'+y;}
+  const CATS=['Personal','Work','Health','Finance','Other'];
+  const CAT_COLORS={Personal:'#8b5cf6',Work:'#4f46e5',Health:'#10b981',Finance:'#f59e0b',Other:'#64748b'};
+
+  function render(){
+    const search=document.getElementById('searchInput').value.toLowerCase();
+    const visible=tasks.filter(t=>{
+      if(filters.status==='pending'&&t.done)return false;
+      if(filters.status==='completed'&&!t.done)return false;
+      if(filters.prio!=='all'&&t.prio!==filters.prio)return false;
+      if(filters.cat!=='all'&&t.cat!==filters.cat)return false;
+      if(search&&!t.title.toLowerCase().includes(search)&&!t.cat.toLowerCase().includes(search))return false;
+      return true;
+    });
+    const prioOrder={high:0,medium:1,low:2};
+    visible.sort((a,b)=>{
+      if(a.done!==b.done)return a.done?1:-1;
+      if(prioOrder[a.prio]!==prioOrder[b.prio])return prioOrder[a.prio]-prioOrder[b.prio];
+      if(a.due&&b.due)return a.due.localeCompare(b.due);
+      if(a.due)return-1;if(b.due)return 1;return 0;
+    });
+    const total=tasks.length,done=tasks.filter(t=>t.done).length;
+    const overdue=tasks.filter(t=>!t.done&&isOverdue(t.due)).length;
+    document.getElementById('statTotal').textContent=total;
+    document.getElementById('statDone').textContent=done;
+    document.getElementById('statPending').textContent=total-done;
+    document.getElementById('statOverdue').textContent=overdue;
+    document.getElementById('countHigh').textContent=tasks.filter(t=>!t.done&&t.prio==='high').length;
+    document.getElementById('countMed').textContent=tasks.filter(t=>!t.done&&t.prio==='medium').length;
+    document.getElementById('countLow').textContent=tasks.filter(t=>!t.done&&t.prio==='low').length;
+
+    document.getElementById('categoryProgress').innerHTML=CATS.map(cat=>{
+      const ct=tasks.filter(t=>t.cat===cat);if(!ct.length)return'';
+      const cd=ct.filter(t=>t.done).length;
+      const pct=Math.round((cd/ct.length)*100),color=CAT_COLORS[cat];
+      return`<div class="progress-row"><div class="cat-header"><span>${cat}</span><span style="color:var(--text-muted)">${cd}/${ct.length}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
+    }).join('')||'<div style="color:var(--text-muted);font-size:.9rem">No tasks yet.</div>';
+
+    const listEl=document.getElementById('taskList');
+    if(!visible.length){listEl.innerHTML='<div class="empty">No tasks found. Add one above! 🎉</div>';return;}
+    listEl.innerHTML=visible.map(t=>{
+      const ob=(!t.done&&isOverdue(t.due))?`<span class="badge overdue">⚠️ Overdue</span>`:(t.due?`<span class="badge due">📅 ${formatDate(t.due)}</span>`:'');
+      const ci=t.done?`<svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:'';
+      return`<div class="task-card ${t.done?'completed':''}"><div class="check" onclick="toggleDone(${t.id})">${ci}</div><div class="task-body"><div class="task-title">${escHtml(t.title)}</div><div class="task-meta"><span class="badge cat" style="background:${CAT_COLORS[t.cat]}22;color:${CAT_COLORS[t.cat]}">${t.cat}</span><span class="badge ${t.prio}">${t.prio==='high'?'🔴':t.prio==='medium'?'🟡':'🟢'} ${t.prio.charAt(0).toUpperCase()+t.prio.slice(1)}</span>${ob}</div></div><div class="task-actions"><button class="btn btn-sm btn-edit" onclick="openEdit(${t.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id})">✕</button></div></div>`;
+    }).join('');
+  }
+
+  function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  render();
+</script>
+
+
+</body></html>
