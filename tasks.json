@@ -1,150 +1,155 @@
-{
-  "version": 1,
-  "exported": "2026-06-21T12:29:56.884Z",
-  "tasks": [
-    {
-      "id": 1781952212828,
-      "title": "Take a dentist appointment",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "2026-06-21",
-      "done": false,
-      "created": "2026-06-20T10:43:32.828Z"
-    },
-    {
-      "id": 1781952240165,
-      "title": "Reparer chemise",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "2026-06-10",
-      "done": false,
-      "created": "2026-06-20T10:44:00.165Z"
-    },
-    {
-      "id": 1781952258296,
-      "title": "Organiser augustin birthday",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T10:44:18.296Z"
-    },
-    {
-      "id": 1781953139924,
-      "title": "Acheter calecons",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T10:58:59.924Z"
-    },
-    {
-      "id": 1781953255909,
-      "title": "Prendre billet Shuttle 3/7 et vacances",
-      "cat": "Personal",
-      "prio": "high",
-      "due": "2026-06-21",
-      "done": false,
-      "created": "2026-06-20T11:00:55.909Z"
-    },
-    {
-      "id": 1781953275299,
-      "title": "Changer billet avion Lyon",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "2026-06-18",
-      "done": false,
-      "created": "2026-06-20T11:01:15.299Z"
-    },
-    {
-      "id": 1781953301835,
-      "title": "Prendre RDV Dermato",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T11:01:41.835Z"
-    },
-    {
-      "id": 1781955287890,
-      "title": "Responder a Hoops pour message sur efficient team",
-      "cat": "Work",
-      "prio": "high",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T11:34:47.890Z"
-    },
-    {
-      "id": 1781958185675,
-      "title": "Test",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:23:05.675Z"
-    },
-    {
-      "id": 1781958400170,
-      "title": "hyhhy",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:26:40.170Z"
-    },
-    {
-      "id": 1781958402392,
-      "title": "jyjyjy",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:26:42.392Z"
-    },
-    {
-      "id": 1781958408879,
-      "title": "jyjyjyj",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:26:48.879Z"
-    },
-    {
-      "id": 1781959001859,
-      "title": "new tenst",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:36:41.859Z"
-    },
-    {
-      "id": 1781959064918,
-      "title": "thththththth",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T12:37:44.918Z"
-    },
-    {
-      "id": 1781972075820,
-      "title": "ololololololo",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T16:14:35.820Z"
-    },
-    {
-      "id": 1781972452537,
-      "title": "ahurissant",
-      "cat": "Personal",
-      "prio": "medium",
-      "due": "",
-      "done": false,
-      "created": "2026-06-20T16:20:52.538Z"
-    }
-  ]
-}
+[
+  {
+    "id": 1781952212828,
+    "title": "Take a dentist appointment",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "2026-06-21",
+    "done": false,
+    "created": "2026-06-20T10:43:32.828Z"
+  },
+  {
+    "id": 1781952240165,
+    "title": "Reparer chemise",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "2026-06-10",
+    "done": false,
+    "created": "2026-06-20T10:44:00.165Z"
+  },
+  {
+    "id": 1781952258296,
+    "title": "Organiser augustin birthday",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T10:44:18.296Z"
+  },
+  {
+    "id": 1781953139924,
+    "title": "Acheter calecons",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T10:58:59.924Z"
+  },
+  {
+    "id": 1781953255909,
+    "title": "Prendre billet Shuttle 3/7 et vacances",
+    "cat": "Personal",
+    "prio": "high",
+    "due": "2026-06-21",
+    "done": false,
+    "created": "2026-06-20T11:00:55.909Z"
+  },
+  {
+    "id": 1781953275299,
+    "title": "Changer billet avion Lyon",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "2026-06-18",
+    "done": false,
+    "created": "2026-06-20T11:01:15.299Z"
+  },
+  {
+    "id": 1781953301835,
+    "title": "Prendre RDV Dermato",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T11:01:41.835Z"
+  },
+  {
+    "id": 1781955287890,
+    "title": "Responder a Hoops pour message sur efficient team",
+    "cat": "Work",
+    "prio": "high",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T11:34:47.890Z"
+  },
+  {
+    "id": 1781958185675,
+    "title": "Test",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:23:05.675Z"
+  },
+  {
+    "id": 1781958400170,
+    "title": "hyhhy",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:26:40.170Z"
+  },
+  {
+    "id": 1781958402392,
+    "title": "jyjyjy",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:26:42.392Z"
+  },
+  {
+    "id": 1781958408879,
+    "title": "jyjyjyj",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:26:48.879Z"
+  },
+  {
+    "id": 1781959001859,
+    "title": "new tenst",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:36:41.859Z"
+  },
+  {
+    "id": 1781959064918,
+    "title": "thththththth",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T12:37:44.918Z"
+  },
+  {
+    "id": 1781972075820,
+    "title": "ololololololo",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T16:14:35.820Z"
+  },
+  {
+    "id": 1781972452537,
+    "title": "ahurissant",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-20T16:20:52.538Z"
+  },
+  {
+    "id": 1782045048744,
+    "title": "trop c est rop",
+    "cat": "Personal",
+    "prio": "medium",
+    "due": "",
+    "done": false,
+    "created": "2026-06-21T12:30:48.746Z"
+  }
+]
