@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported": "2026-06-21T13:13:42.168Z",
+  "exported": "2026-06-21T13:35:49.919Z",
   "tasks": [
     {
       "id": 1781952212828,
@@ -147,22 +147,22 @@
       "created": "2026-06-20T16:20:52.538Z"
     },
     {
-      "id": 1782045048744,
-      "title": "trop c est rop",
+      "id": 1782046685314,
+      "title": "kikii",
       "cat": "Personal",
       "prio": "medium",
       "due": "",
       "done": false,
-      "created": "2026-06-21T12:30:48.746Z"
+      "created": "2026-06-21T12:58:05.314Z"
     },
     {
-      "id": 1782047040957,
-      "title": "j en peux plususussusuususususu",
+      "id": 1782046717578,
+      "title": "est ce l;a derniere",
       "cat": "Personal",
       "prio": "medium",
       "due": "",
       "done": false,
-      "created": "2026-06-21T13:04:00.957Z"
+      "created": "2026-06-21T12:58:37.578Z"
     }
   ]
 }
